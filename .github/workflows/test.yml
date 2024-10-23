@@ -1,4 +1,4 @@
-name: Docker Image CI with Selenium Test1
+name: Docker Image CI with Selenium Test2
 
 on:
   push:

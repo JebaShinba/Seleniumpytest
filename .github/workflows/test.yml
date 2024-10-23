@@ -1,0 +1,52 @@
+name: Docker Image CI with Selenium Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Ensure requirements.txt is in the root
+
+
+    - name: Check Docker version
+      run: docker --version
+
+    - name: Build Docker image
+      run: |
+        docker build -t my-selenium-app:latest .  # Build the Docker image
+
+    - name: Save Docker image
+      run: docker image save my-selenium-app:latest | xz -z -e -7 -T0 > selenium.xz
+
+    - name: List Files
+      run: ls -la  # Verify that selenium.xz was created
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: v${{ github.run_number }}  # Use the run number as the version tag
+        release_name: Release ${{ github.run_number }}
+        draft: false
+        prerelease: false
+    
+
+   
